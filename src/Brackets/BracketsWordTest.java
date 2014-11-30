@@ -33,6 +33,7 @@ public class BracketsWordTest {
 
     }
 
+    @Test
     public void testIsBracketWordExtended() throws Exception {
 //        put('(', Arrays.asList(')',']', '[') );
 //        put('{', Arrays.asList('>',']','(') );
@@ -40,9 +41,11 @@ public class BracketsWordTest {
 //        put('<', Arrays.asList('>') );
         BracketsWord bracketsWord = new BracketsWord();
         String[] testCases = new String[]{
-                "sklgjd", "", "{egftw}", "{fe[vd]}",  "{{[([])]}}",
-                "{fe[]}",  "{fe[()]}",  "sakjla", "(aa)abba", "(dsfb{bbaa}[]fgb)rg",
-                "(dkfj]", "(dkfj[sdf]]", "(aabaab]",
+                "sklgjd", "", "{egftw]",
+                "{fe[vd}(",  "{{[([}))(>",
+                "{fe][}",  "{fe[){](",  "sakjla", "(aa)abba",
+                "(dsfb{bbaa{(]fgb)rg", "(dkfj]",
+                "(dkfj[sdf{]", "(aabaab]",
                 "<fg{r(g[[oi)}fd>"
         };
 

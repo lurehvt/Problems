@@ -42,11 +42,11 @@ public class BracketsWord {
     }
 
     public boolean IsBracketWordExtended( String word){
-        HashMap<Character, List<Character>> closingBrackets = new HashMap<Character, List<Character>>();
+        HashMap<Character, HashSet<Character>> closingBrackets = new HashMap<Character, HashSet<Character>>();
         //assuming unique values in brackets map
         for (Map.Entry<Character, List<Character>> entry : bracketsExtended.entrySet())
             for (Character end : entry.getValue()) {
-                closingBrackets.putIfAbsent(end, Arrays.asList(entry.getKey()));
+                closingBrackets.putIfAbsent(end, new HashSet<Character>(entry.getKey()));
                 closingBrackets.get(end).add(entry.getKey());
             }
 
@@ -56,54 +56,65 @@ public class BracketsWord {
         return IsBracketWordExtended(letters, notMatched, closingBrackets);
     }
 
-    private boolean IsBracketWordExtended(char[] letters, Stack<Character> notMatched, HashMap<Character, List<Character>> closingBrackets) {
+    private boolean IsBracketWordExtended(char[] letters, Stack<Character> notMatched, HashMap<Character, HashSet<Character>> closingBrackets) {
         if( letters.length == 0 )
             return notMatched.isEmpty();
         //skip non brackets
         int i = 0;
-        while(!IsBracketLetter( letters[i], closingBrackets) && i < letters.length) i++;
+        while(i < letters.length && !IsBracketLetter( letters[i], closingBrackets)) i++;
         if( i == letters.length) return notMatched.isEmpty();
 
 
         if( notMatched.isEmpty()){
             if( additionalLetters.contains(letters[i]) || bracketsExtended.containsKey(letters[i])){
                 notMatched.push(letters[i]);
-                return IsBracketWordExtended(Arrays.copyOfRange(letters, i+1, letters.length-1), notMatched, closingBrackets);
+                boolean isWord = IsBracketWordExtended(Arrays.copyOfRange(letters, i+1, letters.length), notMatched, closingBrackets);
+                notMatched.pop();
+                return isWord;
             }
             else return false; //closing bracket with no opening bracket to match
         }
         else{
             if( (additionalLetters.contains(letters[i]) && notMatched.peek() == letters[i])){
-                notMatched.pop();
-                return IsBracketWordExtended(Arrays.copyOfRange(letters, i+1, letters.length-1), notMatched, closingBrackets);
+                char top = notMatched.pop();
+                boolean isWord =  IsBracketWordExtended(Arrays.copyOfRange(letters, i+1, letters.length), notMatched, closingBrackets);
+                notMatched.push(top);
+                return isWord;
             }
             if( closingBrackets.containsKey(letters[i]) && closingBrackets.get(letters[i]).contains( notMatched.peek()) ) {
                 if(!bracketsExtended.containsKey(letters[i])){
-                    notMatched.pop();
-                    return IsBracketWordExtended(Arrays.copyOfRange(letters, i+1, letters.length-1), notMatched, closingBrackets);
+                    char top = notMatched.pop();
+                    boolean isWord =  IsBracketWordExtended(Arrays.copyOfRange(letters, i+1, letters.length), notMatched, closingBrackets);
+                    notMatched.push(top);
+                    return isWord;
                 }
                 else{
                     //branch:
                     notMatched.push(letters[i]);
                     boolean openingBracketBranch =
-                            IsBracketWordExtended(Arrays.copyOfRange(letters, i+1, letters.length-1), notMatched, closingBrackets);
+                            IsBracketWordExtended(Arrays.copyOfRange(letters, i+1, letters.length), notMatched, closingBrackets);
+                    notMatched.pop();
                     if(openingBracketBranch) return true;
                     //closing bracket branch:
-                    notMatched.pop();
-                    return IsBracketWordExtended(Arrays.copyOfRange(letters, i+1, letters.length-1), notMatched, closingBrackets);
+                    char top = notMatched.pop();
+                    boolean isWord =  IsBracketWordExtended(Arrays.copyOfRange(letters, i+1, letters.length), notMatched, closingBrackets);
+                    notMatched.push(top);
+                    return isWord;
 
                 }
             }
             else {
                 //opening bracket, and not closing
                 notMatched.push(letters[i]);
-                return IsBracketWordExtended(Arrays.copyOfRange(letters, i+1, letters.length-1), notMatched, closingBrackets);
+                boolean isWord =   IsBracketWordExtended(Arrays.copyOfRange(letters, i+1, letters.length), notMatched, closingBrackets);
+                notMatched.pop();
+                return isWord;
             }
 
         }
     }
 
-    private boolean IsBracketLetter(char c, HashMap<Character, List<Character>> closingBrackets) {
+    private boolean IsBracketLetter(char c, HashMap<Character, HashSet<Character>> closingBrackets) {
         return closingBrackets.containsKey(c) || bracketsExtended.containsKey(c) || additionalLetters.contains(c);
     }
 }
